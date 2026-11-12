@@ -1,0 +1,40 @@
+<footer class="bg-gray-900 text-gray-400 border-t border-gray-800 mt-auto">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      
+      <!-- Brand Details -->
+      <div>
+        <a routerLink="/" class="text-2xl font-black text-white tracking-tight">E-STORE</a>
+        <p class="mt-3 text-sm text-gray-400 leading-relaxed">
+          Your modern full-stack e-commerce destination built with Spring Boot, ProgresSQL Database, and Angular.
+        </p>
+      </div>
+
+      <!-- Quick Navigation -->
+      <div>
+        <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">Quick Links</h3>
+        <ul class="space-y-2 text-sm">
+          <li><a routerLink="/" class="hover:text-white transition-colors">All Products</a></li>
+          <li><a routerLink="/" class="hover:text-white transition-colors">Categories</a></li>
+          <li><a routerLink="/" class="hover:text-white transition-colors">Cart</a></li>
+        </ul>
+      </div>
+
+      <!-- System Status -->
+      <div>
+        <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">Stack Specs</h3>
+        <div class="flex flex-col gap-2 text-xs font-mono">
+          <span class="text-emerald-400">● Backend: Spring Boot REST API</span>
+          <span class="text-indigo-400">● Frontend: Angular v19 Standalone</span>
+          <span class="text-amber-400">● Database: ProgresSQL</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="border-t border-gray-800 mt-8 pt-8 text-center text-xs text-gray-500">
+      &copy; {{ currentYear }} E-STORE. All rights reserved.
+    </div>
+  </div>
+</footer>

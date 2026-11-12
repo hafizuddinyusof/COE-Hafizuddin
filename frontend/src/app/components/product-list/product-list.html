@@ -1,0 +1,123 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  
+  <!-- Header & Category Filter Buttons -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+    <div>
+      <h1 class="text-3xl font-extrabold text-gray-900">Explore Products</h1>
+      <p class="text-gray-500 mt-1">Discover our latest collection fetched straight from Spring Boot.</p>
+    </div>
+
+    <!-- Category Pills -->
+    <div class="flex flex-wrap gap-2">
+      @for (cat of categories; track cat) {
+        <button 
+          (click)="selectCategory(cat)"
+          [class]="selectedCategory() === cat 
+            ? 'bg-indigo-600 text-white shadow-md' 
+            : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'"
+          class="px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+          {{ cat }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Product Grid or Empty State -->
+  @if (filteredProducts().length === 0) {
+    <div class="text-center py-16 bg-gray-50 rounded-2xl border border-dashed border-gray-300">
+      <svg class="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <h3 class="text-lg font-medium text-gray-900">No products found</h3>
+      <p class="text-gray-500 text-sm mt-1">
+        No results found
+        @if (productService.searchTerm()) { for "<strong>{{ productService.searchTerm() }}</strong>" }
+        @if (selectedCategory() !== 'All') { in category "<strong>{{ selectedCategory() }}</strong>" }.
+      </p>
+    </div>
+  } @else {
+    <!-- 8 Items Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      @for (product of paginatedProducts(); track product.id) {
+        <div 
+          [routerLink]="['/products', product.id]" 
+          class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between group">
+          
+          <div>
+            <div class="overflow-hidden h-48 bg-gray-100 flex items-center justify-center">
+              <img 
+                [src]="productService.getProductImageUrl(product)" 
+                [alt]="product.name" 
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                onerror="this.src='https://via.placeholder.com/300?text=No+Image'" />
+            </div>
+            
+            <div class="p-4">
+              <span class="text-xs font-semibold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md">
+                {{ product.category }}
+              </span>
+              <h2 class="text-lg font-bold text-gray-800 mt-2 line-clamp-1 group-hover:text-indigo-600 transition-colors">
+                {{ product.name }}
+              </h2>
+              @if (product.rating) {
+                <div class="flex items-center mt-2 text-yellow-500 text-sm">
+                  ★ <span class="text-gray-600 ml-1 font-medium">{{ product.rating }}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="p-4 pt-0 flex justify-between items-center mt-2">
+            <span class="text-xl font-extrabold text-gray-900">RM {{ product.price.toFixed(2) }}</span>
+            <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm">
+              View Details
+            </button>
+          </div>
+
+        </div>
+      }
+    </div>
+
+    <!-- Pagination Controls -->
+    @if (totalPages() > 1) {
+      <div class="mt-10 flex items-center justify-between border-t border-gray-200 pt-6">
+        <p class="text-sm text-gray-600">
+          Page <span class="font-semibold text-gray-900">{{ currentPage() }}</span> of 
+          <span class="font-semibold text-gray-900">{{ totalPages() }}</span> 
+          ({{ filteredProducts().length }} total products)
+        </p>
+
+        <div class="flex items-center gap-2">
+          <!-- Previous Button -->
+          <button 
+            (click)="prevPage()"
+            [disabled]="currentPage() === 1"
+            class="px-3.5 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+            Previous
+          </button>
+
+          <!-- Page Numbers -->
+          @for (page of [].constructor(totalPages()); track $index) {
+            <button 
+              (click)="goToPage($index + 1)"
+              [class]="$index + 1 === currentPage()
+                ? 'bg-indigo-600 text-white font-bold'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'"
+              class="w-10 h-10 rounded-lg text-sm font-medium transition-colors">
+              {{ $index + 1 }}
+            </button>
+          }
+
+          <!-- Next Button -->
+          <button 
+            (click)="nextPage()"
+            [disabled]="currentPage() === totalPages()"
+            class="px-3.5 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+            Next
+          </button>
+        </div>
+      </div>
+    }
+  }
+
+</div>

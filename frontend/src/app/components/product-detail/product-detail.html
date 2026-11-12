@@ -1,0 +1,84 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Back Button -->
+  <a routerLink="/products" class="inline-flex items-center text-sm font-semibold text-indigo-600 hover:text-indigo-800 mb-6 group transition-colors">
+    <svg class="w-5 h-5 mr-1 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+    </svg>
+    Back to Catalog
+  </a>
+
+  <!-- Loading Skeleton State -->
+  @if (isLoading()) {
+    <div class="animate-pulse grid grid-cols-1 md:grid-cols-2 gap-8 bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
+      <div class="bg-gray-200 h-96 rounded-xl"></div>
+      <div class="space-y-4">
+        <div class="bg-gray-200 h-6 w-24 rounded"></div>
+        <div class="bg-gray-200 h-10 w-3/4 rounded"></div>
+        <div class="bg-gray-200 h-8 w-32 rounded"></div>
+        <div class="bg-gray-200 h-24 w-full rounded"></div>
+      </div>
+    </div>
+  }
+
+  <!-- Error State -->
+  @else if (errorMessage()) {
+    <div class="text-center py-16 bg-red-50 rounded-2xl border border-red-200">
+      <p class="text-red-600 text-lg font-semibold">{{ errorMessage() }}</p>
+      <a routerLink="/products" class="mt-4 inline-block bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors">
+        Return to Shop
+      </a>
+    </div>
+  }
+
+  <!-- Product Details Card -->
+  @else if (product(); as prod) {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
+      
+      <!-- Image Box -->
+      <div class="overflow-hidden rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center p-4">
+        <img [src]="productService.getProductImageUrl(prod)" 
+             [alt]="prod.name" 
+             class="w-full max-h-[450px] object-contain rounded-lg"
+             onerror="this.src='https://via.placeholder.com/500?text=No+Image'" />
+      </div>
+
+      <!-- Details Box -->
+      <div class="flex flex-col justify-between">
+        <div class="space-y-4">
+          <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-md inline-block">
+            {{ prod.category }}
+          </span>
+
+          <h1 class="text-3xl font-extrabold text-gray-900">{{ prod.name }}</h1>
+
+          @if (prod.rating) {
+            <div class="flex items-center text-yellow-500 text-base">
+              ★ <span class="text-gray-700 font-semibold ml-1">{{ prod.rating }}</span>
+              <span class="text-gray-400 text-xs ml-2">(Verified Rating)</span>
+            </div>
+          }
+
+          <div class="border-t border-b border-gray-100 py-4 my-4">
+            <span class="text-3xl font-extrabold text-gray-900">RM {{ prod.price.toFixed(2) }}</span>
+          </div>
+
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Experience premium quality with {{ prod.name }}. Built for durability and style, sourced directly from our Spring Boot inventory database.
+          </p>
+        </div>
+
+        <!-- Actions -->
+        <div class="pt-6 space-y-3">
+          <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
+            </svg>
+            Add to Cart
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  }
+</div>

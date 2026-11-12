@@ -1,0 +1,174 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-extrabold text-gray-900">Product & Stock Management</h1>
+      <p class="text-gray-500 mt-1">Manage inventory, track stock levels, and update product catalog.</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Form Section -->
+    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm h-fit">
+      <h2 class="text-xl font-bold text-gray-800 mb-4">
+        {{ isEditing() ? 'Edit Product' : 'Add New Product' }}
+      </h2>
+
+      <form (ngSubmit)="saveProduct()" #productForm="ngForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Product Name</label>
+          <input type="text" [(ngModel)]="currentProduct.name" name="name" required
+                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Category</label>
+          <select [(ngModel)]="currentProduct.category" name="category"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            @for (cat of categories; track cat) {
+              <option [value]="cat">{{ cat }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Price (RM)</label>
+            <input type="number" step="0.01" [(ngModel)]="currentProduct.price" name="price" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Rating</label>
+            <input type="number" step="0.1" max="5" min="0" [(ngModel)]="currentProduct.rating" name="rating" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Stock</label>
+            <input type="number" min="0" [(ngModel)]="currentProduct.stock" name="stock" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Product Image File</label>
+          <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*"
+                 class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+        </div>
+
+        <div class="flex gap-3 pt-2">
+          <button type="submit" [disabled]="isSaving()"
+                  class="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+            {{ isSaving() ? 'Saving...' : (isEditing() ? 'Update' : 'Upload') }}
+          </button>
+          @if (isEditing()) {
+            <button type="button" (click)="resetForm()" [disabled]="isSaving()"
+                    class="bg-gray-200 hover:bg-gray-300 disabled:opacity-50 text-gray-800 font-semibold py-2 px-4 rounded-lg transition-colors">
+              Cancel
+            </button>
+          }
+        </div>
+      </form>
+    </div>
+
+    <!-- Table Section -->
+    <div class="lg:col-span-2 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col justify-between">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead class="bg-gray-50 border-b border-gray-200 text-xs text-gray-500 uppercase">
+            <tr>
+              <th class="p-4 w-16">Image</th>
+              <th class="p-4">Product Name</th>
+              <th class="p-4">Category</th>
+              <th class="p-4">Price</th>
+              <th class="p-4">Stock</th>
+              <th class="p-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+          @for (prod of paginatedProducts(); track prod.id) {
+            <tr>
+              <td class="p-4 whitespace-nowrap">
+                <!-- Points to Spring Boot database stream endpoint -->
+                <img [src]="'/api/products/' + prod.id + '/image'" 
+                     [alt]="prod.name" 
+                     class="h-10 w-10 object-cover rounded-md border bg-gray-100"
+                     onerror="this.src='https://via.placeholder.com/50?text=No+Img'" />
+              </td>
+              <td class="p-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ prod.name }}</td>
+              <td class="p-4 whitespace-nowrap text-sm text-gray-500">{{ prod.category }}</td>
+              <td class="p-4 whitespace-nowrap text-sm text-gray-900 font-semibold">RM {{ prod.price.toFixed(2) }}</td>
+              
+              <!-- Stock Control Column -->
+              <td class="p-4 whitespace-nowrap text-sm">
+                <div class="flex items-center gap-2">
+                  <span [class]="(prod.stock ?? 0) === 0 
+                    ? 'bg-red-100 text-red-700 border-red-200' 
+                    : (prod.stock ?? 0) < 5 
+                    ? 'bg-amber-100 text-amber-700 border-amber-200' 
+                    : 'bg-emerald-100 text-emerald-700 border-emerald-200'"
+                    class="px-2 py-0.5 rounded-full text-xs font-semibold border">
+                    {{ (prod.stock ?? 0) === 0 ? 'Out of Stock' : prod.stock + ' in stock' }}
+                  </span>
+
+                  <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-white">
+                    <button type="button" (click)="adjustStock(prod, -1)" [disabled]="(prod.stock ?? 0) <= 0"
+                            class="px-2 py-0.5 text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-white transition-colors">
+                      -
+                    </button>
+                    <button type="button" (click)="adjustStock(prod, 1)"
+                            class="px-2 py-0.5 text-gray-600 hover:bg-gray-100 transition-colors">
+                      +
+                    </button>
+                  </div>
+                </div>
+              </td>
+
+              <td class="p-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
+                <button (click)="editProduct(prod)" class="text-indigo-600 hover:text-indigo-900">Edit</button>
+                <button (click)="deleteProduct(prod.id)" class="text-red-600 hover:text-red-800">Delete</button>
+              </td>
+            </tr>
+          }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Controls Outside Table -->
+      @if (totalPages() > 1) {
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+          <p class="text-sm text-gray-600">
+            Showing Page <span class="font-semibold text-gray-900">{{ currentPage() }}</span> of 
+            <span class="font-semibold text-gray-900">{{ totalPages() }}</span> 
+            ({{ products().length }} total items)
+          </p>
+
+          <div class="flex items-center gap-2">
+            <button 
+              (click)="prevPage()"
+              [disabled]="currentPage() === 1"
+              class="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
+              Previous
+            </button>
+
+            @for (page of [].constructor(totalPages()); track $index) {
+              <button 
+                (click)="goToPage($index + 1)"
+                [class]="$index + 1 === currentPage()
+                  ? 'bg-indigo-600 text-white font-bold'
+                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'"
+                class="w-8 h-8 rounded-md text-sm font-medium transition-colors">
+                {{ $index + 1 }}
+              </button>
+            }
+
+            <button 
+              (click)="nextPage()"
+              [disabled]="currentPage() === totalPages()"
+              class="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
+              Next
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
